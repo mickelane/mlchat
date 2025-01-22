@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT File Upload</title>
+    <script>
+        function uploadFile() {
+            let fileInput = document.getElementById("fileInput");
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerText = data.response || data.error;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function sendMessage() {
+            let userInput = document.getElementById("userMessage").value;
+
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let chatBox = document.getElementById("chatBox");
+                chatBox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
+                chatBox.innerHTML += `<p><b>ChatGPT:</b> ${data.response}</p>`;
+                document.getElementById("userMessage").value = "";
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h1>ChatGPT File Upload & Chat</h1>
+
+    <!-- File Upload Section -->
+    <h2>Upload a File</h2>
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload & Analyze</button>
+    <p id="response"></p>
+
+    <!-- Chat Section -->
+    <h2>Chat with ChatGPT</h2>
+    <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:200px; overflow-y:scroll;"></div>
+    <input type="text" id="userMessage" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>

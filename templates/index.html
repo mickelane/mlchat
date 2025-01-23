@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT File Upload</title>
+    <title>mlChat File Upload</title>
+    
+    <!-- Link to main.css -->
+    <link rel="stylesheet" href="static/main.css">
+    
     <script>
         function uploadFile() {
             let fileInput = document.getElementById("fileInput");
@@ -33,15 +37,16 @@
             .then(data => {
                 let chatBox = document.getElementById("chatBox");
                 chatBox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
-                chatBox.innerHTML += `<p><b>ChatGPT:</b> ${data.response}</p>`;
+                chatBox.innerHTML += `<p><b>mlChat:</b> ${data.response}</p>`;
                 document.getElementById("userMessage").value = "";
             })
             .catch(error => console.error("Error:", error));
         }
     </script>
 </head>
-<body>
-    <h1>ChatGPT File Upload & Chat</h1>
+<body class="is-preload">
+    <div id="wrapper" class="fade-in">
+    <h1>mlChat File Upload & Chat</h1>
 
     <!-- File Upload Section -->
     <h2>Upload a File</h2>
@@ -50,9 +55,15 @@
     <p id="response"></p>
 
     <!-- Chat Section -->
-    <h2>Chat with ChatGPT</h2>
+    <h2>Chat with mlChat</h2>
     <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:200px; overflow-y:scroll;"></div>
     <input type="text" id="userMessage" placeholder="Type your message...">
     <button onclick="sendMessage()">Send</button>
+
+    <!-- Link to noscript.css inside a noscript tag -->
+    <noscript>
+        <link rel="stylesheet" href="static/noscript.css">
+    </noscript>
+    </div>
 </body>
 </html>

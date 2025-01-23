@@ -26,22 +26,45 @@
         }
 
         function sendMessage() {
-            let userInput = document.getElementById("userMessage").value;
+    let userInput = document.getElementById("userMessage").value;
 
-            fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput })
-            })
-            .then(response => response.json())
-            .then(data => {
-                let chatBox = document.getElementById("chatBox");
-                chatBox.innerHTML += `<p><b>You:</b><br> ${userInput}</p>`;
-                chatBox.innerHTML += `<p><b>mlChat:</b><br> ${data.response}</p>`;
-                document.getElementById("userMessage").value = "";
-            })
-            .catch(error => console.error("Error:", error));
-        }
+    fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let chatBox = document.getElementById("chatBox");
+        
+        // Format the user input and bot response
+        chatBox.innerHTML += `
+            <div class="message-container">
+                <br><br><b>You:</b>
+                <div class="user-message">${userInput}</div>
+            </div>
+            <br><br>
+            <div class="message-container">
+                <b>mlChat:</b>
+                <div class="bot-message">${formatResponse(data.response)}</div>
+            </div>
+        `;
+        
+        document.getElementById("userMessage").value = "";
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+// Function to format the response with headers, lists, and paragraphs
+function formatResponse(response) {
+    // Replace any custom formatting you want to apply here, e.g., for headings, lists, etc.
+    return response
+        .replace(/### (.*?)(?=\n)/g, '<h3>$1</h3>')  // Converts '###' to <h3>
+        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')  // Converts '**bold text**' to <b>
+        .replace(/\- (.*?)(?=\n)/g, '<ul><li>$1</li></ul>')  // Converts '- item' to <ul><li>item</li></ul>
+        .replace(/\n/g, '<br>');  // Converts newlines to <br> tags
+}
+
         function checkEnter(event) {
             if (event.key === "Enter") {
                 event.preventDefault();  
@@ -67,13 +90,9 @@
         
         <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; margin-top: 10px;">
             <div style="position: relative; width: 60%; height: 130px;">
-                <textarea id="userMessage" placeholder="Ask mlChat something." style="border:1px solid #ccc; width: 100%; height: 100%; resize: none;" onkeydown="checkEnter(event)"></textarea>
-                
+                <textarea id="userMessage" placeholder="Ask mlChat something." style="width: 100%; height: 100%; resize: none;" onkeydown="checkEnter(event)"></textarea>
                 <button onclick="sendMessage()" style="position: absolute; bottom: 10px; right: 10px;">Send</button>
             </div>
-        
-            
-        
         </div>
       
     </div>

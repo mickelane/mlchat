@@ -36,8 +36,8 @@
             .then(response => response.json())
             .then(data => {
                 let chatBox = document.getElementById("chatBox");
-                chatBox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
-                chatBox.innerHTML += `<p><b>mlChat:</b> ${data.response}</p>`;
+                chatBox.innerHTML += `<p><b>You:</b><br> ${userInput}</p>`;
+                chatBox.innerHTML += `<p><b>mlChat:</b><br> ${data.response}</p>`;
                 document.getElementById("userMessage").value = "";
             })
             .catch(error => console.error("Error:", error));

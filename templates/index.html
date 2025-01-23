@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mlChat File Upload</title>
+    <title>mlChat</title>
     
     <!-- Link to main.css -->
-    <link rel="stylesheet" href="static/main.css">
+    <link rel="stylesheet" href="static/styles.css">
     
     <script>
         function uploadFile() {
@@ -42,28 +42,35 @@
             })
             .catch(error => console.error("Error:", error));
         }
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();  
+                sendMessage();           
+            }
+        }
     </script>
 </head>
-<body class="is-preload">
-    <div id="wrapper" class="fade-in">
-    <h1>mlChat File Upload & Chat</h1>
+<body style="margin: 0; padding: 0; height: 100vh;">
 
-    <!-- File Upload Section -->
-    <h2>Upload a File</h2>
-    <input type="file" id="fileInput">
-    <button onclick="uploadFile()">Upload & Analyze</button>
-    <p id="response"></p>
+    <div id="wrapper" style="width: 100%; height: 100%; margin: 0; padding: 0;">
+        <h1>mlChat</h1>
 
-    <!-- Chat Section -->
-    <h2>Chat with mlChat</h2>
-    <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:200px; overflow-y:scroll;"></div>
-    <input type="text" id="userMessage" placeholder="Type your message...">
-    <button onclick="sendMessage()">Send</button>
+        <!-- File Upload Section -->
+        <!-- Hidden file input with custom button -->
+        <input type="file" id="fileInput" style="display:none;">
+        <button onclick="document.getElementById('fileInput').click()">Choose File</button>
+        <button onclick="uploadFile()">Analyze</button>
+        <p id="response"></p>
 
-    <!-- Link to noscript.css inside a noscript tag -->
-    <noscript>
-        <link rel="stylesheet" href="static/noscript.css">
-    </noscript>
+        <!-- Chat Section -->
+        <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:400px; width:100%; overflow-y:scroll;"></div>
+        
+        <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; margin-top: 10px;">
+            <div style="position: relative; width: 60%; height: 130px;">
+                <textarea id="userMessage" placeholder="Type your message..." style="width: 100%; height: 100%; resize: none;" onkeydown="checkEnter(event)"></textarea>
+                <button onclick="sendMessage()" style="position: absolute; bottom: 10px; right: 10px;">Send</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>

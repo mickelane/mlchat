@@ -7,19 +7,34 @@ import numpy as np
 from flask import Flask, render_template, request, jsonify, session
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import subprocess
 
 load_dotenv()  # Load API key from .env file
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # Needed for session storage
 app.config['UPLOAD_FOLDER'] = 'uploads'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'xlsm', 'xlsx'}
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'doc', 'xlsm', 'xlsx'}
 
 client = OpenAI()
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Ensure upload folder exists
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def convert_doc_to_docx(doc_file):
+    try:
+        # Convert .doc to .docx using unoconv
+        output_file = doc_file.rsplit('.', 1)[0] + '.docx'
+        subprocess.run(["unoconv", "-f", "docx", doc_file], check=True)
+        return output_file
+    except Exception as e:
+        return str(e)
+
+def extract_text_from_docx(file_path):
+    doc = docx.Document(file_path)
+    return "\n".join([para.text for para in doc.paragraphs])
+
 
 def extract_text(file_path):
     """Extracts text from uploaded files"""
@@ -32,8 +47,11 @@ def extract_text(file_path):
                 text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
         
         elif ext == "docx":
-            doc = docx.Document(file_path)
-            text = "\n".join([para.text for para in doc.paragraphs])
+            text = extract_text_from_docx(file_path)
+        
+        elif ext == "doc":
+            docx_file = convert_doc_to_docx(file_path)  # Convert .doc to .docx
+            text = extract_text_from_docx(docx_file)
         
         elif ext in {"xlsm", "xlsx"}:
             df = pd.read_excel(file_path, sheet_name=None)  # Load all sheets

@@ -16,6 +16,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'xlsm', 'xlsx'}
 
 client = OpenAI()
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Ensure upload folder exists
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -25,26 +26,29 @@ def extract_text(file_path):
     ext = file_path.rsplit('.', 1)[1].lower()
     text = ""
 
-    if ext == "pdf":
-        with pdfplumber.open(file_path) as pdf:
-            text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+    try:
+        if ext == "pdf":
+            with pdfplumber.open(file_path) as pdf:
+                text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+        
+        elif ext == "docx":
+            doc = docx.Document(file_path)
+            text = "\n".join([para.text for para in doc.paragraphs])
+        
+        elif ext in {"xlsm", "xlsx"}:
+            df = pd.read_excel(file_path, sheet_name=None)  # Load all sheets
+            text = "\n".join([
+                "\n".join(map(str, sheet.fillna("").to_numpy().flatten()))  # Fill NaN with empty string
+                for _, sheet in df.items()
+            ])
+        
+        elif ext == "txt":
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+    except Exception as e:
+        return str(e)  # Return error message if extraction fails
     
-    elif ext == "docx":
-        doc = docx.Document(file_path)
-        text = "\n".join([para.text for para in doc.paragraphs])
-    
-    elif ext in {"xlsm", "xlsx"}:
-        df = pd.read_excel(file_path, sheet_name=None)  # Load all sheets
-        text = "\n".join([
-            "\n".join(map(str, sheet.replace({np.nan: ""}).to_numpy().flatten()))  
-            for _, sheet in df.items()
-        ])
-    
-    elif ext == "txt":
-        with open(file_path, "r", encoding="utf-8") as f:
-            text = f.read()
-    
-    return text
+    return text if text else "No text extracted"
 
 @app.route("/")
 def index():
@@ -62,6 +66,8 @@ def upload_file():
 
     filename = secure_filename(file.filename)
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Ensure the directory exists
     file.save(file_path)
 
     text = extract_text(file_path)
@@ -87,22 +93,31 @@ def chat():
 
     # Ensure the AI knows it should reference the uploaded document
     system_message = (
-        "You have access to a document uploaded by the user. Here is the content:\n\n"
-        f"{document_text}\n\n"
-        "Now answer the user's question based on this document."
+        "You are an AI assistant that can answer both general questions and questions based on an uploaded document. "
+        "If the user's question relates to the document, prioritize using the document's content. "
+        "Otherwise, use your general knowledge."
     )
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message}
-        ]
-    )
+    context_message = f"Here is the uploaded document:\n\n{document_text[:4000]}" if document_text else ""
 
-    reply = response.choices[0].message.content
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "system", "content": context_message},
+        {"role": "user", "content": user_message}
+    ]
+
+    messages = [msg for msg in messages if msg["content"].strip()]  # Remove empty messages
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=messages
+        )
+        reply = response.choices[0].message.content
+    except Exception as e:
+        return jsonify({"error": f"OpenAI API error: {str(e)}"}), 500
+
     return jsonify({"response": reply})
 
 if __name__ == "__main__":
-    os.makedirs("uploads", exist_ok=True)
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5001)), debug=True)

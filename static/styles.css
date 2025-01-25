@@ -59,3 +59,18 @@ textarea:focus, button:focus {
     display: block; /* Makes each message on a new line */
     text-align: left; /* Aligns the text to the left */
 }
+
+#loadingGlobe {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Ensure it takes up space */
+}
+
+.globe {
+    width: 50px;  /* Adjust size as needed */
+    height: 50px;
+}
+.hidden {
+    display: none; /* Hide the loading icon initially */
+}

@@ -26,33 +26,40 @@
         }
 
         function sendMessage() {
-    let userInput = document.getElementById("userMessage").value;
+            let userInput = document.getElementById("userMessage").value;
+            let loadingGlobe = document.getElementById("loadingGlobe");
+            
+           
 
-    fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userInput })
-    })
-    .then(response => response.json())
-    .then(data => {
-        let chatBox = document.getElementById("chatBox");
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let chatBox = document.getElementById("chatBox");
         
-        // Format the user input and bot response
-        chatBox.innerHTML += `
-            <div class="message-container">
-                <br><br><b>You:</b>
-                <div class="user-message">${userInput}</div>
-            </div>
-            <br><br>
-            <div class="message-container">
-                <b>mlChat:</b>
-                <div class="bot-message">${formatResponse(data.response)}</div>
-            </div>
+                // Format the user input and bot response
+                chatBox.innerHTML += `
+                    <div class="message-container">
+                        <br><br><b>You:</b>
+                        <div class="user-message">${userInput}</div>
+                    </div>
+                    <br><br>
+                    <div class="message-container">
+                        <b>mlChat:</b>
+                        <div class="bot-message">${formatResponse(data.response)}</div>
+                    </div>
         `;
         
-        document.getElementById("userMessage").value = "";
+                document.getElementById("userMessage").value = "";
+                // Hide the loading globe after response is received
+                loadingGlobe.classList.add("hidden");
     })
     .catch(error => console.error("Error:", error));
+    // Hide the loading globe if there's an error
+    loadingGlobe.classList.add("hidden");
 }
 
 // Function to format the response with headers, lists, and paragraphs
@@ -86,7 +93,12 @@ function formatResponse(response) {
         <p id="response"></p>
 
         <!-- Chat Section -->
-        <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:400px; width:100%; overflow-y:scroll;"></div>
+        <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:400px; width:100%; overflow-y:scroll;">
+            <div id="loadingGlobe" class="hidden">
+                <img src="/static/infinity.gif" alt="Loading..." class="globe">
+            </div>
+
+        </div>
         
         <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; margin-top: 10px;">
             <div style="position: relative; width: 60%; height: 130px;">

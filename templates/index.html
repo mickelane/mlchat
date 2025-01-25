@@ -25,41 +25,44 @@
             .catch(error => console.error("Error:", error));
         }
 
-        function sendMessage() {
-            let userInput = document.getElementById("userMessage").value;
-           
-            
-           
+        async function sendMessage() {
+  let userInput = document.getElementById("userMessage").value;
+  let chatBox = document.getElementById("chatBox");
+  let sendButton = document.getElementById("sendButton");
 
-            fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput })
-            })
-            .then(response => response.json())
-            .then(data => {
-                let chatBox = document.getElementById("chatBox");
-        
-                // Format the user input and bot response
-                chatBox.innerHTML += `
-                    <div class="message-container">
-                        <br><br><b>You:</b>
-                        <div class="user-message">${userInput}</div>
-                    </div>
-                    <br><br>
-                    <div class="message-container">
-                        <b>mlChat:</b>
-                        <div class="bot-message">${formatResponse(data.response)}</div>
-                    </div>
-        `;
-        
-                document.getElementById("userMessage").value = "";
-                // Hide the loading globe after response is received
-               
-    })
-    .catch(error => console.error("Error:", error));
-    // Hide the loading globe if there's an error
-  
+  sendButton.classList.add('in-use');
+  sendButton.disabled = true; 
+
+  try {
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userInput })
+    });
+
+    const data = await response.json();
+
+    // Process the response and update chatbox
+    chatBox.innerHTML += `
+      <div class="message-container">
+        <br><br><b>You:</b>
+        <div class="user-message">${userInput}</div>
+      </div>
+      <br><br>
+      <div class="message-container">
+        <b>mlChat:</b>
+        <div class="bot-message">${formatResponse(data.response)}</div>
+      </div>
+    `;
+
+    document.getElementById("userMessage").value = ""; 
+
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    sendButton.classList.remove('in-use');
+    sendButton.disabled = false; 
+  }
 }
 
 // Function to format the response with headers, lists, and paragraphs
@@ -78,6 +81,8 @@ function formatResponse(response) {
                 sendMessage();           
             }
         }
+
+        
     </script>
 </head>
 <body style="margin: 0; padding: 0; height: 100vh;">
@@ -100,7 +105,7 @@ function formatResponse(response) {
         <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; margin-top: 10px;">
             <div style="position: relative; width: 60%; height: 130px;">
                 <textarea id="userMessage" placeholder="Ask mlChat something." style="width: 100%; height: 100%; resize: none;" onkeydown="checkEnter(event)"></textarea>
-                <button onclick="sendMessage()" style="position: absolute; bottom: 10px; right: 10px;">Send</button>
+                <button id="sendButton" onclick="sendMessage()" style="position: absolute; bottom: 10px; right: 10px;">Send</button>
             </div>
         </div>
       

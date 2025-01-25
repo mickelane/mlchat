@@ -20,6 +20,15 @@ button {
     cursor: pointer;
     font-size: 16px;  /* optional: ensures button text is readable */
 }
+button:active {
+    background-color: darkgrey;  /* Make it slightly darker when clicked */
+}
+
+button:disabled, button.in-use {
+    background-color: grey !important; /* Make sure it's grey when disabled or in-use */
+    cursor: not-allowed !important; /* Change cursor when button is disabled */
+}
+
 
 /* Button hover effect */
 button:hover {

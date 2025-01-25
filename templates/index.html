@@ -27,7 +27,7 @@
 
         function sendMessage() {
             let userInput = document.getElementById("userMessage").value;
-            let loadingGlobe = document.getElementById("loadingGlobe");
+           
             
            
 
@@ -55,11 +55,11 @@
         
                 document.getElementById("userMessage").value = "";
                 // Hide the loading globe after response is received
-                loadingGlobe.classList.add("hidden");
+               
     })
     .catch(error => console.error("Error:", error));
     // Hide the loading globe if there's an error
-    loadingGlobe.classList.add("hidden");
+  
 }
 
 // Function to format the response with headers, lists, and paragraphs
@@ -94,10 +94,7 @@ function formatResponse(response) {
 
         <!-- Chat Section -->
         <div id="chatBox" style="border:1px solid #ccc; padding:10px; height:400px; width:100%; overflow-y:scroll;">
-            <div id="loadingGlobe" class="hidden">
-                <img src="/static/infinity.gif" alt="Loading..." class="globe">
-            </div>
-
+           
         </div>
         
         <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; margin-top: 10px;">

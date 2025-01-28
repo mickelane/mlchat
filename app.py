@@ -8,11 +8,14 @@ from flask import Flask, render_template, request, jsonify, session
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import subprocess
+import secrets
+
+# Generate a secure random secret key
 
 load_dotenv()  # Load API key from .env file
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Needed for session storage
+app.secret_key = os.getenv("SECRET_KEY")
 app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'doc', 'xlsm', 'xlsx'}
 
@@ -128,7 +131,7 @@ def chat():
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4",
             messages=messages
         )
         reply = response.choices[0].message.content
